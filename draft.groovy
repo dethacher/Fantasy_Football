@@ -46,6 +46,7 @@ def draft(year = null) {
 println "\n\nScript Output"
 
 def file = new File("draft.csv")
+file.text = ''
 
 draft().each {
 	file << it.Player_Name + "," + it.Player_Position + "," + it.Player_Team + "," + it.To + "," + it.Cost.findAll( /\d+/ )*.toInteger()[0] + "\n"
