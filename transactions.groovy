@@ -40,7 +40,10 @@ def transaction(year = null) {
 									Player_Position: pos,
 									From: it.td[4].text().trim(),
 									To: it.td[5].text().trim(),
-									Cost: 0
+									Cost: 0,
+									Date: it.td[0].text().trim(),
+									Week: it.td[1].text().trim(),
+									Owner: it.td[6].div.span.text().trim()
 								]
 							)
 			       		}
@@ -60,6 +63,8 @@ def transaction(year = null) {
 					        pos = it.td[3].div.em.text().split('-')[0].trim()
 				        	team = it.td[3].div.em.text().split('-')[1].trim()
 			       	}
+			       	else
+			       		pos = it.td[3].div.em.text().trim()
 		       		results.add(
 						[
 							Action: it.td[2].text().trim(),
@@ -68,7 +73,10 @@ def transaction(year = null) {
 							Player_Position: pos,
 							From: it.td[4].text().trim(),
 							To: to,
-							Cost: cost
+							Cost: cost,
+							Date: it.td[0].text().trim(),
+							Week: it.td[1].text().trim(),
+							Owner: it.td[6].div.span.text().trim()
 						]
 					)
 				}
@@ -85,7 +93,9 @@ def transaction(year = null) {
 println "\n\nScript Output"
 
 def file = new File("transactions.csv")
+file.text = ''
 
 transaction().each {
-	file << it.Player_Name + "," + it.Player_Position + "," + it.Player_Team + "," + it.To + "," + it.From + "," + it.Cost + ',' + it.Action + "\n"
+	if (it.Action != "Lineup" && it.Action != "LM")
+		file << it.Data + "," + it.Week + "," + it.Action + "," + it.Player_Name + " " + it.Player_Position + "," + it.From + "," + it.To + "," + it.Owner + "," + it.Player_Position + "," + it.Cost + "," + it.Player_Team + "\n"
 }
