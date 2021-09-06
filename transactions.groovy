@@ -86,6 +86,6 @@ println "\n\nScript Output"
 
 def file = new File("transactions.csv")
 
-draft().each {
+transaction().each {
 	file << it.Player_Name + "," + it.Player_Position + "," + it.Player_Team + "," + it.To + "," + it.From + "," + it.Cost + ',' + it.Action + "\n"
 }
