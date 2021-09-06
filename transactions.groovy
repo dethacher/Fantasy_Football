@@ -97,5 +97,5 @@ file.text = ''
 
 transaction().each {
 	if (it.Action != "Lineup" && it.Action != "LM")
-		file << it.Data + "," + it.Week + "," + it.Action + "," + it.Player_Name + " " + it.Player_Position + "," + it.From + "," + it.To + "," + it.Owner + "," + it.Player_Position + "," + it.Cost + "," + it.Player_Team + "\n"
+		file << it.Date + "," + it.Week + "," + it.Action + "," + it.Player_Name + " " + it.Player_Position + "," + it.From + "," + it.To + "," + it.Owner + "," + it.Player_Position + "," + it.Cost + "," + it.Player_Team + "\n"
 }
