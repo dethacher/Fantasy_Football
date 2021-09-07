@@ -35,7 +35,7 @@ def transaction(year = null) {
 				       		results.add(
 								[
 									Action: it.td[2].text().trim(),
-									Player_Name: lol.div.a.text().trim(),
+									Player_Name: lol.div.a[0].text().trim(),
 									Player_Team: team,
 									Player_Position: pos,
 									From: it.td[4].text().trim(),
@@ -68,7 +68,7 @@ def transaction(year = null) {
 		       		results.add(
 						[
 							Action: it.td[2].text().trim(),
-							Player_Name: it.td[3].div.a.text().trim(),
+							Player_Name: it.td[3].div.a[0].text().trim(),
 							Player_Team: team,
 							Player_Position: pos,
 							From: it.td[4].text().trim(),
