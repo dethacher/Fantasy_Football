@@ -21,15 +21,25 @@ def depth(team_url) {
 						def name = t.td[num].span[1].span[0].a[0].text().trim()
 						if (name != "")
 							names.add(name)
+						else {
+							name = t.td[num].span[2].span[0].a[0].text().trim()
+							if (name != "")
+								names.add(name)
+						}
 					}
 					catch (Exception e) {
 						// Ignore All Exceptions
 					}
 					try {
-						(0..56).each() { x ->
+						(0..14).each() { x ->
 							def name = t.td[num].div[0].div[x].span[1].span[0].a[0].text().trim()
 							if (name != "")
 								names.add(name)
+							else {
+								name = t.td[num].div[0].div[x].span[2].span[0].a[0].text().trim()
+								if (name != "")
+									names.add(name)
+							}
 						}
 					}
 					catch (Exception e) {
@@ -48,6 +58,7 @@ def depth(team_url) {
 }
 
 def teams = [
+	[ URL: "SF/san-francisco-49ers/", TEAM: "49ers" ],
 	[ URL: "ATL/atlanta-falcons/", TEAM: "Falacons" ],
 	[ URL: "BUF/buffalo-bills/", TEAM: "Biils" ],
 	[ URL: "MIA/miami-dolphins/", TEAM: "Dolphins" ],
@@ -66,7 +77,6 @@ def teams = [
 	[ URL: "LAC/los-angeles-chargers/", TEAM: "Chargers" ],
 	[ URL: "LV/las-vegas-raiders/", TEAM: "Raiders" ],
 	[ URL: "SEA/seattle-seahawks/", TEAM: "Seahawks" ],
-	[ URL: "SF/san-francisco-49ers/", TEAM: "49ers" ],
 	[ URL: "LAR/los-angeles-rams/", TEAM: "Rams" ],
 	[ URL: "ARI/arizona-cardinals/", TEAM: "Cardinals" ],
 	[ URL: "TB/tampa-bay-buccaneers/", TEAM: "Buccaneers" ],
@@ -82,20 +92,53 @@ def teams = [
 	[ URL: "NYG/new-york-giants/", TEAM: "Gaints" ]
 ]
 
+def pos_lut = [
+	[ "Quarterback", "QB" ],
+	[ "Running Back", "RB" ],
+	[ "Fullback", "FB" ],
+	[ "Wide Receiver", "WR" ],
+	[ "Tight End", "TE" ],
+	[ "Left Tackle", "LT" ],
+	[ "Left Guard", "LG" ],
+	[ "Center", "C" ],
+	[ "Right Guard", "RG" ],
+	[ "Right Tackle", "RT" ],
+	[ "Left Defensive End", "DL" ],
+	[ "Right Defensive End", "DL" ],
+	[ "Left Defensive Tackle", "DL" ],
+	[ "Nose Tackle", "DL" ],
+	[ "Right Defensive Tackle", "DL" ],
+	[ "Left Inside Linebacker", "LB" ],
+	[ "Right Inside Linebacker", "LB" ],
+	[ "Strongside Linebacker", "LB" ],
+	[ "Strongside Linebacker", "LB" ],
+	[ "Middle Linebacker", "LB" ],
+	[ "Weakside Linebacker", "LB" ],
+	[ "Right Cornerback", "DB" ],
+	[ "Left Cornerback", "DB" ],
+	[ "Strong Safety", "DB" ],
+	[ "Free Safety", "DB" ],
+	[ "Punter", "P" ],
+	[ "Kicker", "K" ],
+	[ "Long Snapper", "LS" ],
+	[ "Holder", "H" ],
+	[ "Punt Returner", "PR" ],
+	[ "Kick Returner", "KR" ]
+]
+
 println "\n\nScript Output"
-def dir = new File("CBS_Sports_Depth_Charts")
-if (!dir.exists())
-	dir.mkdirs()
+def file = new File(" Depth Chart " + new Date().toTimestamp().toString() + ".csv")
+file.text = ''
 
 teams.each {
-	def file = new File("CBS_Sports_Depth_Charts/" + it.TEAM + " Depth Chart " + new Date().toTimestamp().toString() + ".csv")
-	file.text = ''
+	def team = it.URL.split("/")[0]
 
 	depth(it.URL).each() {
-		file << it.Position
+		def num = 1
+		def pos = pos_lut.find { p -> p[0] == it.Position }[1]
 		it.Players.each() { player ->
-			file << "," + player
+			file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "\n"
+			++num
 		}
-		file << "\n"
 	}
 }
