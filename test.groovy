@@ -49,10 +49,12 @@ def transaction(year = null) {
 	(0..500).each() { num ->
 		def tagsoupParser = new org.ccil.cowan.tagsoup.Parser()
 		def slurper = new XmlSlurper(tagsoupParser)
-		def url = "https://fantasy.nfl.com/league/2393954/transactions?offset=" + (num * 20).toString()
+		def url = "https://fantasy.nfl.com/league/2393954/transactions"
+		if (num != 0)
+			url = "https://fantasy.nfl.com/league/2393954/transactions?offset=" + ((num * 20) + 1).toString()
 		if (year != null)
 			if (num == 0)
-				url = "https://fantasy.nfl.com/league/2393954/history/" + year + "/transactions?offset"
+				url = "https://fantasy.nfl.com/league/2393954/history/" + year + "/transactions"
 			else
 				url = "https://fantasy.nfl.com/league/2393954/history/" + year + "/transactions?offset=" + ((num * 20) + 1).toString()
 		def htmlParser = slurper.parse(url)
@@ -73,12 +75,15 @@ def transaction(year = null) {
 				       		results.add(
 								[
 									Action: it.td[2].text().trim(),
-									Player_Name: lol.div.a.text().trim(),
+									Player_Name: lol.div.a[0].text().trim(),
 									Player_Team: team,
 									Player_Position: pos,
 									From: it.td[4].text().trim(),
 									To: it.td[5].text().trim(),
-									Cost: 0
+									Cost: 0,
+									Date: it.td[0].text().trim(),
+									Week: it.td[1].text().trim(),
+									Owner: it.td[6].div.span.text().trim()
 								]
 							)
 			       		}
@@ -98,15 +103,20 @@ def transaction(year = null) {
 					        pos = it.td[3].div.em.text().split('-')[0].trim()
 				        	team = it.td[3].div.em.text().split('-')[1].trim()
 			       	}
+			       	else
+			       		pos = it.td[3].div.em.text().trim()
 		       		results.add(
 						[
 							Action: it.td[2].text().trim(),
-							Player_Name: it.td[3].div.a.text().trim(),
+							Player_Name: it.td[3].div.a[0].text().trim(),
 							Player_Team: team,
 							Player_Position: pos,
 							From: it.td[4].text().trim(),
 							To: to,
-							Cost: cost
+							Cost: cost,
+							Date: it.td[0].text().trim(),
+							Week: it.td[1].text().trim(),
+							Owner: it.td[6].div.span.text().trim()
 						]
 					)
 				}
