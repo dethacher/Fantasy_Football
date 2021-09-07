@@ -92,7 +92,7 @@ def transaction(year = null) {
 
 println "\n\nScript Output"
 
-def file = new File("transactions.csv")
+def file = new File("transactions " + new Date().toTimestamp().toString() + ".csv")
 file.text = ''
 
 transaction().each {
