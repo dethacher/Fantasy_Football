@@ -179,10 +179,6 @@ teams.each {
 	}
 }
 
-/*players().each() {
-	println it
-}*/
-
 players().each() {
 	table.each() { t ->
 		if (t.Player == it.Player && t.Pos == it.Pos && t.Team == it.Team)
