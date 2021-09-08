@@ -1,5 +1,5 @@
 // Author: David Thacher
-// Date: 9/7/2021
+// Date: 9/8/2021
 @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='1.2' )
 
 def depth(team_url) {
