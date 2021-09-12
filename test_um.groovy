@@ -346,32 +346,16 @@ transaction(year).reverse().each { record ->
 // Update with Keepers. (Check for breaks)
 if (args.size() > 0 && args[0] == "final") {
 	def tmp = []
-	if (false) {
-		new File("keepers.csv").eachLine { line ->
-			def keeper = line.split(',')
-			def team = getName(keeper[1].trim(), names, false)
-			def index = table.findIndexValues { it.Player == keeper[0].trim() && it.Team == team }
+	keepers().each { keeper ->
+		def team = getName(keeper.Team, names, false)
+		def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
 			
-			if (index.size > 1 || index.size == 0)
-				System.err.println "Failed to find keeper " + keeper
-			else {
-				index = (int) index[0]
-				tmp.add(table[index])
-			}
-		}
-	}
-	else {
-		keepers().each { keeper ->
-			def team = getName(keeper.Team, names, false)
-			def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
-			
-			if (index.size > 1 || index.size == 0)
-				System.err.println "Failed to find keeper " + keeper.Player + " on " + team
-			else {
-				index = (int) index[0]
-				table[index].Position = keeper.Position
-				tmp.add(table[index])
-			}
+		if (index.size > 1 || index.size == 0)
+			System.err.println "Failed to find keeper " + keeper.Player + " on " + team
+		else {
+			index = (int) index[0]
+			table[index].Position = keeper.Position
+			tmp.add(table[index])
 		}
 	}
 
