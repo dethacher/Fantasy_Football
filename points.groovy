@@ -4,10 +4,10 @@
 
 def points() {
 	def results = []
-	def pos_list = [ 1, 2, 3, 4, 6, 10, 7, 11, 12, 13, 14 ]
+	def pos_list = [ 1, 2, 3, 4, 7, 11, 12, 13 ]
 
 	pos_list.each() { pos_index ->
-		(1..500).each() { num ->
+		(1..25).each() { num ->
 			def tagsoupParser = new org.ccil.cowan.tagsoup.Parser()
 			def slurper = new XmlSlurper(tagsoupParser)
 			def url = "https://fantasy.nfl.com/league/2393954/players?playerStatus=all&position=" + pos_index + "&offset=" + (num * 25).toString()
