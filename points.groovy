@@ -23,6 +23,8 @@ def points() {
 						pos = it.td[1].div.em.text().split('-')[0].trim()
 						team = it.td[1].div.em.text().split('-')[1].trim()
 					}
+					else
+						pos = it.td[1].div.em.text().trim()
 					
 					results.add(
 						[
