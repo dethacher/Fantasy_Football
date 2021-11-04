@@ -27,6 +27,12 @@ def points() {
 					}
 					else
 						pos = it.td[1].div.em.text().trim()
+					
+					def points = it.td[20].span.text().trim()
+					if (pos_index == 7)
+						points = it.td[16].span.text().trim()
+					else if (pos_index == 14)
+						points = it.td[22].span.text().trim()
 
 					results.add(
 						[
@@ -34,7 +40,7 @@ def points() {
 							Player_Team: team,
 							Player_Position: pos,
 							Player_Id: href.split('=')[2],
-							Pts: it.td[20].span.text().trim()
+							Pts: points
 						]
 					)
 				}
