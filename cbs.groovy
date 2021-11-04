@@ -15,16 +15,23 @@ def depth(team_url) {
 			it.tbody.tr.collect { t ->
 				def pos = t.td[0].text().trim()
 				def names = []
+				def ids = []
 				
 				(1..3).each() { num ->
 					try {
 						def name = t.td[num].span[1].span[0].a[0].text().trim()
-						if (name != "")
+						String href = t.td[num].span[1].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
+						if (name != "") {
 							names.add(name)
+							ids.add(href.split("/")[4])
+						}
 						else {
 							name = t.td[num].span[2].span[0].a[0].text().trim()
-							if (name != "")
+							href = t.td[num].span[2].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
+							if (name != "") {
 								names.add(name)
+								ids.add(href.split("/")[4])
+							}
 						}
 					}
 					catch (Exception e) {
@@ -33,12 +40,18 @@ def depth(team_url) {
 					try {
 						(0..14).each() { x ->
 							def name = t.td[num].div[0].div[x].span[1].span[0].a[0].text().trim()
-							if (name != "")
+							String href = t.td[num].div[0].div[x].span[1].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
+							if (name != "") {
 								names.add(name)
+								ids.add(href.split("/")[4])
+							}
 							else {
 								name = t.td[num].div[0].div[x].span[2].span[0].a[0].text().trim()
-								if (name != "")
+								href = t.td[num].div[0].div[x].span[2].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
+								if (name != "") {
 									names.add(name)
+									ids.add(href.split("/")[4])
+								}
 							}
 						}
 					}
@@ -46,7 +59,7 @@ def depth(team_url) {
 						// Ignore All Exceptions
 					}
 				}
-				results.add( [ Position: pos, Players: names ] )
+				results.add( [ Position: pos, Players: names, IDs: ids ] )
 			}
 		}
 	}
@@ -136,8 +149,8 @@ teams.each {
 	depth(it.URL).each() {
 		def num = 1
 		def pos = pos_lut.find { p -> p[0] == it.Position }[1]
-		it.Players.each() { player ->
-			file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "\n"
+		it.Players.eachWithIndex { player, i ->
+			file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "," + it.IDs[i] + "\n"
 			++num
 		}
 	}
