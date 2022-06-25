@@ -202,44 +202,23 @@ def keepers_nonfinal() {
 		try {
 			htmlParser.'**'.find { it.@class == 'tableWrap hasOverlay' }.table.tbody.tr.collect { t ->
 				try {
-					if (t.td[1].em.a.text().trim() != "Trade") {
-						def player = t.td[1].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[1].div.em.text().split('-').length > 1) {
-							pos = t.td[1].div.em.text().split('-')[0].trim()
-							player_team = t.td[1].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[1].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
+					def player = t.td[2].div[0].a.text().trim()
+					def pos = ""
+					def player_team = ""
+					
+					if (t.td[2].div.em.text().split('-').length > 1) {
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+						player_team = t.td[2].div.em.text().split('-')[1].trim()
 					}
-					else {
-						def player = t.td[2].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[2].div.em.text().split('-').length > 1) {
-							pos = t.td[2].div.em.text().split('-')[0].trim()
-							player_team = t.td[2].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[2].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
-					}
+					else
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+					
+					results.add([
+						Team: team,
+						Player: player,
+						Player_Team: player_team,
+						Position: pos
+						])
 				}
 				catch (Exception e) {
 					// Ignore All Exceptions
@@ -253,44 +232,23 @@ def keepers_nonfinal() {
 		try {
 			htmlParser.'**'.find { it.@id == 'tableWrap-K' }.table.tbody.tr.collect { t ->
 				try {
-					if (t.td[1].em.a.text().trim() != "Trade") {
-						def player = t.td[1].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[1].div.em.text().split('-').length > 1) {
-							pos = t.td[1].div.em.text().split('-')[0].trim()
-							player_team = t.td[1].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[1].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
+					def player = t.td[2].div[0].a.text().trim()
+					def pos = ""
+					def player_team = ""
+					
+					if (t.td[2].div.em.text().split('-').length > 1) {
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+						player_team = t.td[2].div.em.text().split('-')[1].trim()
 					}
-					else {
-						def player = t.td[2].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[2].div.em.text().split('-').length > 1) {
-							pos = t.td[2].div.em.text().split('-')[0].trim()
-							player_team = t.td[2].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[2].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
-					}
+					else
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+					
+					results.add([
+						Team: team,
+						Player: player,
+						Player_Team: player_team,
+						Position: pos
+						])
 				}
 				catch (Exception e) {
 					// Ignore All Exceptions
@@ -304,44 +262,23 @@ def keepers_nonfinal() {
 		try {
 			htmlParser.'**'.find { it.@id == 'tableWrap-DP' }.table.tbody.tr.collect { t ->
 				try {
-					if (t.td[1].em.a.text().trim() != "Trade") {
-						def player = t.td[1].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[1].div.em.text().split('-').length > 1) {
-							pos = t.td[1].div.em.text().split('-')[0].trim()
-							player_team = t.td[1].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[1].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
+					def player = t.td[2].div[0].a.text().trim()
+					def pos = ""
+					def player_team = ""
+					
+					if (t.td[2].div.em.text().split('-').length > 1) {
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+						player_team = t.td[2].div.em.text().split('-')[1].trim()
 					}
-					else {
-						def player = t.td[2].div[0].a.text().trim()
-						def pos = ""
-						def player_team = ""
-						
-						if (t.td[2].div.em.text().split('-').length > 1) {
-							pos = t.td[2].div.em.text().split('-')[0].trim()
-							player_team = t.td[2].div.em.text().split('-')[1].trim()
-					       }
-					       else
-					       	pos = t.td[2].div.em.text().split('-')[0].trim()
-						
-						results.add([
-							Team: team,
-							Player: player,
-							Player_Team: player_team,
-							Position: pos
-							])
-					}
+					else
+						pos = t.td[2].div.em.text().split('-')[0].trim()
+					
+					results.add([
+						Team: team,
+						Player: player,
+						Player_Team: player_team,
+						Position: pos
+						])
 				}
 				catch (Exception e) {
 					// Ignore All Exceptions
