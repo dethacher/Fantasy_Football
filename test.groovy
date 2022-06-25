@@ -180,6 +180,62 @@ def keepers() {
 	return results
 }
 
+def keepers_nonfinal() {
+	def results = []
+	
+	def teams = []
+	
+	(0..20).each() { num ->
+		def tagsoupParser = new org.ccil.cowan.tagsoup.Parser()
+		def slurper = new XmlSlurper(tagsoupParser)
+		def url = "https://fantasy.nfl.com/league/2393954/team/" + (num).toString()
+		def htmlParser = slurper.parse(url)
+		
+		try {
+			htmlParser.'**'.find { it.@class == 'selecter-selected' }.collect { t ->
+				teams.add([
+					Team: t.span[0].text().trim()
+					])
+			}
+		}
+		catch (Exception e) {
+			// Ignore All Exceptions
+		}
+	}
+	
+	(0..20).each() { num ->
+		def tagsoupParser = new org.ccil.cowan.tagsoup.Parser()
+		def slurper = new XmlSlurper(tagsoupParser)
+		def url = "https://fantasy.nfl.com/league/2393954/team/" + (num).toString()
+		def htmlParser = slurper.parse(url)
+
+		try {
+			htmlParser.'**'.find { it.@class == 'tableWrap hasOverlay' }.table.tbody.tr.collect { t ->
+				try {
+					def player = t.td[2].div[0].a.text().trim()
+					def pos = t.td[2].div.em.text().split('-')[0].trim()
+					def player_team = t.td[2].div.em.text().split('-')[1].trim()
+					
+					results.add([
+						Team: teams[num].Team,
+						Player: player,
+						Player_Team: player_team,
+						Position: pos
+						])
+				}
+				catch (Exception e) {
+					// Ignore All Exceptions
+				}
+			}
+		}
+		catch (Exception e) {
+			// Ignore All Exceptions
+		}
+	}
+	
+	return results
+}
+
 def getMin(position, cost, table) {
 	def result = table.get(position)?.value
 	cost = Math.round(cost)
@@ -189,6 +245,7 @@ def getMin(position, cost, table) {
 	return cost
 }
 
+// If flag is true promote the name to new name, otherwise demote it to old name
 def getName(name, names, flag) {
 	def result = name.trim()
 	names.each {
@@ -207,29 +264,15 @@ def getName(name, names, flag) {
 
 println "\n\nScript Output"
 
-def year = Integer.toString(new Date().year + 1899)
+def year = Integer.toString(new Date().year + 1900 - 1)	// Last Year's draft year
 enum LTC_STATUS { NONE, BROKEN, VALID, EXPIRED }
 enum STATUS { WAIVERS, KEEPER, TRADED, DROPPED }
 def table = []
+def new_table = []
 def teams = []
 def WAIVERS_BUDGET = 150
 def MAX_BUDGET = 500
 def names = []
-
-// Load in Draft Data from last year.
-draft(year).each {
-	table.add( [
-		Player: it.Player_Name,
-		Position: it.Player_Position,
-		Team: it.To,
-		Status: STATUS.KEEPER,
-		Cost: it.Cost.findAll( /\d+/ )*.toInteger()[0],
-		LTC_TERM: 0,		// Years left
-		LTC_Status: LTC_STATUS.NONE,
-		LTC_TEAM: "",
-		LTC_COST: 0
-	])
-}
 
 new File("name_changes.csv").eachLine {
 	def line = it.split(',')
@@ -240,11 +283,39 @@ new File("name_changes.csv").eachLine {
 	] )
 }
 
+// Load in Draft Data from last year.
+draft(year).each {
+	table.add( [
+		Player: it.Player_Name,
+		Position: it.Player_Position,
+		Team: getName(it.To, names, false),
+		Status: STATUS.KEEPER,
+		Cost: it.Cost.findAll( /\d+/ )*.toInteger()[0],
+		LTC_TERM: 0,		// Years left
+		LTC_Status: LTC_STATUS.NONE,
+		LTC_TEAM: "",
+		LTC_COST: 0,
+		LTC_BEGIN: 0
+	])
+	new_table.add( [
+		Player: it.Player_Name,
+		Position: it.Player_Position,
+		Team: getName(it.To, names, false),
+		Status: STATUS.KEEPER,
+		Cost: it.Cost.findAll( /\d+/ )*.toInteger()[0],
+		LTC_TERM: 0,		// Years left
+		LTC_Status: LTC_STATUS.NONE,
+		LTC_TEAM: "",
+		LTC_COST: 0,
+		LTC_BEGIN: 0
+	])
+}
+
 // Apply Old LTCs.
 //  CSV uses the following format, one entry per line
 //	Player_Name, LTC (xx-yy), Team, Cost
 new File("ltc.csv").eachLine {
-	def yr = new Date().year - 101
+	def yr = new Date().year - 100 - 1	// The draft has not occured so still last year
 	def line = it.split(',')
 	def team = getName(line[2], names, false)
 	def index = table.findIndexValues { it.Player == line[0] && it.Team == team }
@@ -258,11 +329,14 @@ new File("ltc.csv").eachLine {
 		else {
 			if (years[1] - yr > 0) {
 				index = (int) index[0]
-				table[index].LTC_TEAM = team
-				table[index].LTC_COST = line[3].findAll( /\d+/ )*.toInteger()[0]
-				table[index].Cost = table[index].LTC_COST
-				table[index].LTC_Status = LTC_STATUS.VALID
-				table[index].LTC_TERM = years[1] - yr
+				if (years[0] > table[index].LTC_BEGIN) {
+					table[index].LTC_TEAM = team
+					table[index].LTC_COST = line[3].findAll( /\d+/ )*.toInteger()[0]
+					table[index].Cost = table[index].LTC_COST
+					table[index].LTC_Status = LTC_STATUS.VALID
+					table[index].LTC_TERM = years[1] - yr
+					table[index].LTC_BEGIN = years[0]
+				}
 			}
 		}
 	}
@@ -291,7 +365,8 @@ transaction(year).reverse().each { record ->
 					LTC_TERM: 0,
 					LTC_Status: LTC_STATUS.NONE,
 					LTC_TEAM: "",
-					LTC_COST: 0
+					LTC_COST: 0,
+					LTC_BEGIN: 0
 				])
 			}
 			break
@@ -321,8 +396,8 @@ transaction(year).reverse().each { record ->
 // Update with Keepers. (Check for breaks)
 if (args.size() > 0 && args[0] == "final") {
 	def tmp = []
-	if (false) {
-		new File("keepers.csv").eachLine { line ->
+	if (true) {
+		/*new File("keepers.csv").eachLine { line ->
 			def keeper = line.split(',')
 			def team = getName(keeper[1].trim(), names, false)
 			def index = table.findIndexValues { it.Player == keeper[0].trim() && it.Team == team }
@@ -331,6 +406,20 @@ if (args.size() > 0 && args[0] == "final") {
 				System.err.println "Failed to find keeper " + keeper
 			else {
 				index = (int) index[0]
+				table[index].Status = STATUS.KEEPER
+				tmp.add(table[index])
+			}
+		}*/
+		keepers_nonfinal().each { keeper ->
+			def team = getName(keeper.Team, names, false)
+			def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
+			
+			if (index.size > 1 || index.size == 0)
+				System.err.println "Failed to find keeper " + keeper.Player + " on " + team
+			else {
+				index = (int) index[0]
+				table[index].Position = keeper.Position
+				table[index].Status = STATUS.KEEPER
 				tmp.add(table[index])
 			}
 		}
@@ -345,6 +434,7 @@ if (args.size() > 0 && args[0] == "final") {
 			else {
 				index = (int) index[0]
 				table[index].Position = keeper.Position
+				table[index].Status = STATUS.KEEPER
 				tmp.add(table[index])
 			}
 		}
