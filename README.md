@@ -4,7 +4,7 @@
 This is code is quick and very dirty attempt at automating a long term keeper fantasy football league. It is mostly written from example code and needs to be cleaned up at some point.
 
 ## Setup
-sudo apt-get install libreoffice libreoffice-java-common groovy
+``` sudo apt-get install libreoffice libreoffice-java-common groovy ```
 
 ## How to do Keepers automatically: (no longer needed?)
 1. In Chrome go to: https://fantasy.nfl.com/league/2393954/manage/keeperview
