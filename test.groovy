@@ -658,7 +658,7 @@ teams.eachWithIndex { it, i ->
 	teams[i].Team = getName(teams[i].Team, names, true)
 }
 
-println " Roster"
+/*println " Roster"
 teams.each { team ->
 	table.each {
 		if (it.Team == team.Team)
@@ -675,4 +675,24 @@ teams.each { team ->
 }
 
 println " Money"
-teams.each { println it }
+teams.each { println it } */
+
+import groovy.json.JsonBuilder
+merger = new mailmerge()
+
+teams.each { team ->
+	def roster = ""
+	def broken = ""
+	
+	table.each {
+		if (it.Team == team.Team) 
+			roster += new JsonBuilder(it).toString() + "\n"
+	}
+	
+	table.each {
+		if (it.LTC_TEAM == team.Team && it.LTC_Status == LTC_STATUS.BROKEN)
+			broken += new JsonBuilder(it).toString()  + "\n"
+	}
+	
+	merger.merge(team.Team, roster, new JsonBuilder(team).toString(), "ltc not supported yet", broken)
+}
