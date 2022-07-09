@@ -3,6 +3,7 @@
 
 class league {
 	def populate(isFinal = false) {
+		// Load name changes
 		new File("name_changes.csv").eachLine {
 			def line = it.split(',')
 			
@@ -129,6 +130,7 @@ class league {
 		if (isFinal) {
 			def tmp = []
 			
+			// Populate Keepers
 			keeper.keepers_nonfinal().each { keeper ->
 				def team = getName(keeper.Team, names, false)
 				def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
@@ -143,6 +145,7 @@ class league {
 				}
 			}
 
+			// Check LTC Status
 			table.eachWithIndex { it, i ->
 				if (!tmp.contains(table[i])) {
 					switch (it.LTC_Status) {
@@ -165,6 +168,7 @@ class league {
 			def draft = [ "QB":15, "RB":10, "WR":10, "TE":6, "K":1, "DL":5, "LB":8, "DB":8, "":0 ]	
 			def trade = [ "QB":20, "RB":13, "WR":13, "TE":8, "K":1, "DL":7, "LB":11, "DB":11, "":0 ]
 			
+			// Compute Keeper Costs
 			switch (table[i].Status) {
 				case STATUS.TRADED:
 					table[i].Cost = getMin(it.Position, table[i].Cost * 0.7, trade)
@@ -180,24 +184,11 @@ class league {
 					break;
 			}
 			
+			// Compute LTC Penalties
 			if (table[i].LTC_Status == LTC_STATUS.BROKEN) {
-				def pen = 0	
-				def y1 = table[i].LTC_COST
-				def y2 = Math.round(table[i].LTC_COST * 1.15)
-				def y3 = Math.round(y2 * 1.15)
-				
-				switch (table[i].LTC_TERM) {
-					case 2:
-						pen = (y3 - y1) + (y2 - y1)
-						break
-					case 1:
-						pen = y3 - y1
-						break
-				}
-				
-				pen = Math.round(pen)
-				
+				def pen = compute_penalty(table[i].LTC_COST, table[i].LTC_TERM)					
 				def isFound = false
+				
 				teams.eachWithIndex { team, x ->
 					if (team.Team == it.LTC_TEAM) {
 						isFound = true
@@ -222,6 +213,7 @@ class league {
 				table[i].Penalty = pen
 			}
 			
+			// Compute Salary Cap
 			if (table[i].Status != STATUS.DROPPED) {
 				def isFound = false
 				teams.eachWithIndex { team, x ->
@@ -248,11 +240,14 @@ class league {
 		}
 
 		if (isFinal) {
+			// Check Salary Cap
 			teams.eachWithIndex { team, x ->
 				while (teams[x].Budget < 25) {
 					def cost = 0
 					def pen = 0
 					def player
+					
+					// Find the most expensive player
 					table.each {
 						if (it.Team == team.Team) {
 							if (it.Cost > cost) {
@@ -261,25 +256,14 @@ class league {
 							}
 						}
 					}
+					
+					// Drop them
 					table.eachWithIndex { p, i ->
 						if (p == player) {
 							table[i].Status = STATUS.DROPPED
 							table[i].Team = ""	
 							if (table[i].LTC_Status == LTC_STATUS.VALID) {	
-								def y1 = table[i].LTC_COST
-								def y2 = Math.round(table[i].LTC_COST * 1.15)
-								def y3 = Math.round(y2 * 1.15)
-								
-								switch (table[i].LTC_TERM) {
-									case 2:
-										pen = (y3 - y1) + (y2 - y1)
-										break
-									case 1:
-										pen = y3 - y1
-										break
-								}
-								
-								pen = Math.round(pen)
+								pen = compute_penalty(table[i].LTC_COST, table[i].LTC_TERM)
 								teams[x].Penalty += pen
 								teams[x].Budget -= pen
 								if (teams[x].Budget < WAIVERS_BUDGET)
@@ -289,22 +273,43 @@ class league {
 							}
 						}
 					}
+					
 					teams[x].Budget += cost
 					if (teams[x].Budget < WAIVERS_BUDGET)
 						teams[x].Waivers = teams[x].Budget
+						
 					println team.Team + " forced to drop " + player.Player + " causing penalty " + pen
 				}
 			}
 		}
 
+		// Correct the Team Names
 		table.eachWithIndex { it, i ->
 			table[i].Team = getName(table[i].Team, names, true)
 			table[i].LTC_TEAM = getName(table[i].LTC_TEAM, names, true)
 		}
-
+		
 		teams.eachWithIndex { it, i ->
 			teams[i].Team = getName(teams[i].Team, names, true)
 		}
+	}
+	
+	private def compute_penalty(cost, ltc_term) {
+		def y1 = cost
+		def y2 = Math.round(cost * 1.15)
+		def y3 = Math.round(y2 * 1.15)
+		def pen = 0
+								
+		switch (ltc_term) {
+			case 2:
+				pen = (y3 - y1) + (y2 - y1)
+				break
+			case 1:
+				pen = y3 - y1
+				break
+		}
+								
+		return Math.round(pen)
 	}
 	
 	private def getMin(position, cost, table) {
