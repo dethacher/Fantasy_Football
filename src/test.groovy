@@ -1,11 +1,8 @@
 // Author: David Thacher
-import groovy.json.JsonBuilder
 
 println "\n\nScript Output"
 merger = new mailmerge()
 fantasy = new league()
-
-// 2393954
 
 fantasy.populate(args.size() > 0 && args[0] == "final")
 
