@@ -25,6 +25,8 @@ This is code is quick and very dirty attempt at automating a long term keeper fa
  4. Run: groovy test.groovy (Need keeper.html(?) and ltc.csv files in same directory.)
 
 ## Workflow:
+- Change directory to source folder
+  - ``` cd src ```
 - Run script with keepers and automatic drop disabled for keeper and penalty values.
   - ``` groovy -classpath ".:/usr/lib/libreoffice/program/:$(printf %s: /lib/libreoffice/program/classes/*.jar)" test.groovy ```
 - Run script with keepers.html and automatic drop for final keepers values, budget and list of dropped players. (Manual entry of all of this. NFL.com will handle keepers but not values.)
