@@ -30,6 +30,8 @@ def merge(team = "", roster = "", money = "", ltc = "", broken="") {
 
 	// Load the Document
 	String workingDir = new File(".").getAbsolutePath() + "/";
+	String reportDir = workingDir + "Reports/";
+	new File(reportDir).mkdirs();
 	String myTemplate = workingDir + "letterTemplate.doc";
 	
 	if (!new File(myTemplate).canRead()) {
@@ -112,7 +114,7 @@ def merge(team = "", roster = "", money = "", ltc = "", broken="") {
 	propertyValues[1].Value = "writer_pdf_Export";
 
 	// Appending the favoured extension to the origin document name
-	String myResult = workingDir + team + ".pdf";
+	String myResult = reportDir + team + ".pdf";
 	xStorable.storeToURL("file:///" + myResult, propertyValues);
 
 	System.out.println("Saved " + myResult);
