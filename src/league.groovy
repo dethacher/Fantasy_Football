@@ -127,6 +127,24 @@ class league {
 					break
 			}
 		}
+		
+		table.eachWithIndex { it, i ->
+			def isFound = false
+			
+			teams.eachWithIndex { team, x ->
+				if (team.Team == it.Team)
+					isFound = true
+			}
+			
+			if (!isFound && it.Team != "") {
+				teams.add([
+					Team: it.Team,
+					Penalty: 0,
+					Budget: MAX_BUDGET,
+					Waivers: WAIVERS_BUDGET
+				])
+			}
+		}
 
 		// Update with Keepers. (Check for breaks)
 		if (isFinal) {
