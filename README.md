@@ -28,10 +28,8 @@ This is code is quick and very dirty attempt at automating a long term keeper fa
 ## Workflow:
 - Change directory to source folder
   - ``` cd src ```
-- Run script with keepers and automatic drop disabled for keeper and penalty values.
-  - ``` groovy -classpath ".:/usr/lib/libreoffice/program/:$(printf %s: /lib/libreoffice/program/classes/*.jar)" test.groovy ```
-- Run script with keepers.html and automatic drop for final keepers values, budget and list of dropped players. (Manual entry of all of this. NFL.com will handle keepers but not values.)
-  - ``` groovy -classpath ".:/usr/lib/libreoffice/program/:$(printf %s: /lib/libreoffice/program/classes/*.jar)" test.groovy final ```
+- Run script
+  - ``` groovy -classpath ".:/usr/lib/libreoffice/program/:$(printf %s: /lib/libreoffice/program/classes/*.jar)" offseason.groovy ```
 - LTC call out (Nothing is really done with this.)
 - Draft
 - Manual calculation of waivers.

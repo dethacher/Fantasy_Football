@@ -77,7 +77,7 @@ def keepers_nonfinal(league_id = "2393954") {
 			try {
 				htmlParser.'**'.find { it.@class == 'tableWrap hasOverlay' }.table.tbody.tr.collect { t ->
 					try {
-						def player = t.td[2].div[0].a.text().trim()
+						def player = t.td[2].div[0].a[0].text().trim()
 						def pos = ""
 						def player_team = ""
 						
@@ -107,7 +107,7 @@ def keepers_nonfinal(league_id = "2393954") {
 			try {
 				htmlParser.'**'.find { it.@id == 'tableWrap-K' }.table.tbody.tr.collect { t ->
 					try {
-						def player = t.td[2].div[0].a.text().trim()
+						def player = t.td[2].div[0].a[0].text().trim()
 						def pos = ""
 						def player_team = ""
 						
@@ -137,7 +137,7 @@ def keepers_nonfinal(league_id = "2393954") {
 			try {
 				htmlParser.'**'.find { it.@id == 'tableWrap-DP' }.table.tbody.tr.collect { t ->
 					try {
-						def player = t.td[2].div[0].a.text().trim()
+						def player = t.td[2].div[0].a[0].text().trim()
 						def pos = ""
 						def player_team = ""
 						
