@@ -16,7 +16,7 @@ import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XReplaceDescriptor;
 import com.sun.star.util.XReplaceable;
 
-def merge(team = "", roster = "", money = "", ltc = "", broken="") {
+def merge(team = "", roster = "", money = "", ltc = "", broken = "", nokeep = "") {
 	// Initialise
 	XComponentContext xContext = Bootstrap.bootstrap();
 	
@@ -96,6 +96,11 @@ def merge(team = "", roster = "", money = "", ltc = "", broken="") {
 	// mail merge the broken ltc
 	xReplaceDescr.setSearchString("<broken>");
 	xReplaceDescr.setReplaceString(broken);
+	xReplaceable.replaceAll(xReplaceDescr);
+	
+	// mail merge the non-keepers
+	xReplaceDescr.setSearchString("<nokeep>");
+	xReplaceDescr.setReplaceString(nokeep);
 	xReplaceable.replaceAll(xReplaceDescr);
 	
 	

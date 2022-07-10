@@ -1,9 +1,11 @@
 // Author: David Thacher
 @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='1.2' )
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 
 class league {
 	def populate(isFinal = false) {
-		// Load name changes
+		// Load name changes from name_changes.csv
 		new File("name_changes.csv").eachLine {
 			def line = it.split(',')
 			
@@ -129,20 +131,34 @@ class league {
 		// Update with Keepers. (Check for breaks)
 		if (isFinal) {
 			def tmp = []
+			def tmp_copy = []
+			def table_copy = deepcopy(table)
 			
 			// Populate Keepers
 			keeper.keepers_nonfinal().each { keeper ->
 				def team = getName(keeper.Team, names, false)
 				def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
+				def index_copy = table_copy.findIndexValues { it.Player == keeper.Player && it.Team == team }
 				
-				if (index.size > 1 || index.size == 0)
-					System.err.println "Failed to find keeper " + keeper.Player + " on " + team
-				else {
-					index = (int) index[0]
-					table[index].Position = keeper.Position
-					table[index].Status = STATUS.KEEPER
-					tmp.add(table[index])
+				if (index.size > 1 || index.size == 0) {
+					if (keeper.Player != "")
+						System.err.println "Failed to find keeper " + keeper.Player + " on " + team
 				}
+				else {
+					// Build two tables to so that they use the same references
+					index = (int) index[0]
+					index_copy = (int) index_copy[0]
+					table[index].Position = keeper.Position
+					table_copy[index_copy].Position = keeper.Position
+					tmp.add(table[index])
+					tmp_copy.add(table_copy[index_copy])
+				}
+			}
+			
+			// Add players being dropped before draft to nonkeepers list
+			table_copy.eachWithIndex { it, i ->
+				if (!tmp_copy.contains(table_copy[i]))
+					nonkeepers.add(table_copy[i])
 			}
 
 			// Check LTC Status
@@ -165,20 +181,18 @@ class league {
 
 		// Find total cost and penalities
 		table.eachWithIndex { it, i ->
-			def draft = [ "QB":15, "RB":10, "WR":10, "TE":6, "K":1, "DL":5, "LB":8, "DB":8, "":0 ]	
-			def trade = [ "QB":20, "RB":13, "WR":13, "TE":8, "K":1, "DL":7, "LB":11, "DB":11, "":0 ]
 			
 			// Compute Keeper Costs
 			switch (table[i].Status) {
 				case STATUS.TRADED:
-					table[i].Cost = getMin(it.Position, table[i].Cost * 0.7, trade)
+					table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 0.7), trade)
 					break;
 				case STATUS.WAIVERS:
-					table[i].Cost = getMin(it.Position, table[i].Cost * 1.2, draft)
+					table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 1.2), draft)
 					break;
 				case STATUS.KEEPER:
 					if (table[i].LTC_Status != LTC_STATUS.VALID)
-						table[i].Cost = getMin(it.Position, table[i].Cost * 1.15, draft)
+						table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 1.15), draft)
 					else
 						table[i].Cost = getMin(it.Position, table[i].Cost, draft)
 					break;
@@ -236,6 +250,26 @@ class league {
 						Waivers: wav
 					])
 				}
+			}
+		}
+		
+		// Compute nonkeepers cost
+		nonkeepers.eachWithIndex { it, i ->
+			
+			// The JSON deep copy broke the enum
+			switch ((STATUS) nonkeepers[i].Status) {
+				case STATUS.TRADED:
+					nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 0.7), trade)
+					break;
+				case STATUS.WAIVERS:
+					nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 1.2), draft)
+					break;
+				case STATUS.KEEPER:
+					if (nonkeepers[i].LTC_Status != LTC_STATUS.VALID)
+						nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 1.15), draft)
+					else
+						nonkeepers[i].Cost = getMin(it.Position, nonkeepers[i].Cost, draft)
+					break;
 			}
 		}
 
@@ -314,7 +348,6 @@ class league {
 	
 	private def getMin(position, cost, table) {
 		def result = table.get(position)?.value
-		cost = Math.round(cost)
 		
 		if (result > cost)
 			return result
@@ -337,17 +370,29 @@ class league {
 		return result
 	}
 	
+	// Work around for deep copy instead of shadow copy
+	//	Required for actual copy instead of reference
+	//	Prevents changes from being being applied to all references
+	// https://stackoverflow.com/a/52988069
+	private def deepcopy(orig) {
+		return new JsonSlurper().parseText(JsonOutput.toJson(orig))
+	}
+	
 	
 	enum LTC_STATUS { NONE, BROKEN, VALID, EXPIRED }
 	enum STATUS { WAIVERS, KEEPER, TRADED, DROPPED }
 	def teams = []
 	def table = []
+	def nonkeepers = []
 
 	private def year = Integer.toString(new Date().year + 1900 - 1)	// Last Year's draft year
 	private def new_table = []
 	private def WAIVERS_BUDGET = 150
 	private def MAX_BUDGET = 500
 	private def names = []
+	
+	private def draft = [ "QB":15, "RB":10, "WR":10, "TE":6, "K":1, "DL":5, "LB":8, "DB":8, "":0 ]	
+	private def trade = [ "QB":20, "RB":13, "WR":13, "TE":8, "K":1, "DL":7, "LB":11, "DB":11, "":0 ]
 	
 	private def drafter = new draft()
 	private def keeper = new keepers()
