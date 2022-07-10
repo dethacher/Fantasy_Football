@@ -313,6 +313,19 @@ class league {
 					table.eachWithIndex { p, i ->
 						if (p == player) {
 							table[i].Status = STATUS.DROPPED
+							nonkeepers.add([
+								Player: player.Player,
+								Position: player.Position,
+								Team: player.Team,
+								Status: player.Status,
+								Cost: player.Cost,
+								Penalty: player.Penalty,
+								LTC_TERM: player.LTC_TERM,
+								LTC_Status: player.LTC_Status,
+								LTC_TEAM: player.LTC_TEAM,
+								LTC_COST: player.LTC_COST,
+								LTC_BEGIN: player.LTC_BEGIN
+							])
 							table[i].Team = ""	
 							if (table[i].LTC_Status == LTC_STATUS.VALID) {	
 								pen = compute_penalty(table[i].LTC_COST, table[i].LTC_TERM)
@@ -329,8 +342,8 @@ class league {
 					teams[x].Budget += cost
 					if (teams[x].Budget < WAIVERS_BUDGET)
 						teams[x].Waivers = teams[x].Budget
-						
-					println team.Team + " forced to drop " + player.Player + " causing penalty " + pen
+					
+					println getName(team.Team, names, true) + " forced to drop " + player.Player + " causing penalty " + pen
 				}
 			}
 		}
@@ -343,6 +356,10 @@ class league {
 		
 		teams.eachWithIndex { it, i ->
 			teams[i].Team = getName(teams[i].Team, names, true)
+		}
+		
+		nonkeepers.eachWithIndex { it, i ->
+			nonkeepers[i].Team = getName(nonkeepers[i].Team, names, true)
 		}
 	}
 	
