@@ -1,7 +1,5 @@
 // Author: David Thacher
 @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='1.2' )
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
 
 class league {
 	def populate(isFinal = false) {
@@ -149,14 +147,11 @@ class league {
 		// Update with Keepers. (Check for breaks)
 		if (isFinal) {
 			def tmp = []
-			def tmp_copy = []
-			def table_copy = deepcopy(table)
 			
 			// Populate Keepers
 			keeper.keepers_nonfinal().each { keeper ->
 				def team = getName(keeper.Team, names, false)
 				def index = table.findIndexValues { it.Player == keeper.Player && it.Team == team }
-				def index_copy = table_copy.findIndexValues { it.Player == keeper.Player && it.Team == team }
 				
 				if (index.size > 1 || index.size == 0) {
 					if (keeper.Player != "")
@@ -165,23 +160,29 @@ class league {
 				else {
 					// Build two tables to so that they use the same references
 					index = (int) index[0]
-					index_copy = (int) index_copy[0]
 					table[index].Position = keeper.Position
-					table_copy[index_copy].Position = keeper.Position
 					tmp.add(table[index])
-					tmp_copy.add(table_copy[index_copy])
 				}
-			}
-			
-			// Add players being dropped before draft to nonkeepers list
-			table_copy.eachWithIndex { it, i ->
-				if (!tmp_copy.contains(table_copy[i]))
-					nonkeepers.add(table_copy[i])
 			}
 
 			// Check LTC Status
 			table.eachWithIndex { it, i ->
 				if (!tmp.contains(table[i])) {
+					// Add players being dropped before draft to nonkeepers list
+					//	Make a deep copy
+					nonkeepers.add([
+						Player: table[i].Player,
+						Position: table[i].Position,
+						Team: table[i].Team,
+						Status: table[i].Status,
+						Cost: table[i].Cost,
+						Penalty: table[i].Penalty,
+						LTC_TERM: table[i].LTC_TERM,
+						LTC_Status: table[i].LTC_Status,
+						LTC_TEAM: table[i].LTC_TEAM,
+						LTC_COST: table[i].LTC_COST,
+						LTC_BEGIN: table[i].LTC_BEGIN
+					])
 					switch (it.LTC_Status) {
 						case LTC_STATUS.VALID:
 						case LTC_STATUS.BROKEN:
@@ -201,20 +202,7 @@ class league {
 		table.eachWithIndex { it, i ->
 			
 			// Compute Keeper Costs
-			switch (table[i].Status) {
-				case STATUS.TRADED:
-					table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 0.7), trade)
-					break;
-				case STATUS.WAIVERS:
-					table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 1.2), draft)
-					break;
-				case STATUS.KEEPER:
-					if (table[i].LTC_Status != LTC_STATUS.VALID)
-						table[i].Cost = getMin(it.Position, Math.round(table[i].Cost * 1.15), draft)
-					else
-						table[i].Cost = getMin(it.Position, table[i].Cost, draft)
-					break;
-			}
+			compute_keeper_cost(table[i])
 			
 			// Compute LTC Penalties
 			if (table[i].LTC_Status == LTC_STATUS.BROKEN) {
@@ -273,22 +261,7 @@ class league {
 		
 		// Compute nonkeepers cost
 		nonkeepers.eachWithIndex { it, i ->
-			
-			// The JSON deep copy broke the enum
-			switch ((STATUS) nonkeepers[i].Status) {
-				case STATUS.TRADED:
-					nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 0.7), trade)
-					break;
-				case STATUS.WAIVERS:
-					nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 1.2), draft)
-					break;
-				case STATUS.KEEPER:
-					if (nonkeepers[i].LTC_Status != LTC_STATUS.VALID)
-						nonkeepers[i].Cost = getMin(it.Position, Math.round(nonkeepers[i].Cost * 1.15), draft)
-					else
-						nonkeepers[i].Cost = getMin(it.Position, nonkeepers[i].Cost, draft)
-					break;
-			}
+			compute_keeper_cost(nonkeepers[i])
 		}
 
 		if (isFinal) {
@@ -313,6 +286,7 @@ class league {
 					table.eachWithIndex { p, i ->
 						if (p == player) {
 							table[i].Status = STATUS.DROPPED
+							// Make a deep copy
 							nonkeepers.add([
 								Player: player.Player,
 								Position: player.Position,
@@ -381,6 +355,23 @@ class league {
 		return Math.round(pen)
 	}
 	
+	private def compute_keeper_cost(player) {
+		switch ((STATUS) player.Status) {
+			case STATUS.TRADED:
+				player.Cost = getMin(player.Position, Math.round(player.Cost * 0.7), trade)
+				break;
+			case STATUS.WAIVERS:
+				player.Cost = getMin(player.Position, Math.round(player.Cost * 1.2), draft)
+				break;
+			case STATUS.KEEPER:
+				if (player.LTC_Status != LTC_STATUS.VALID)
+					player.Cost = getMin(player.Position, Math.round(player.Cost * 1.15), draft)
+				else
+					player.Cost = getMin(player.Position, player.Cost, draft)
+				break;
+		}
+	}
+	
 	private def getMin(position, cost, table) {
 		def result = table.get(position)?.value
 		
@@ -403,16 +394,7 @@ class league {
 			}
 		}
 		return result
-	}
-	
-	// Work around for deep copy instead of shadow copy
-	//	Required for actual copy instead of reference
-	//	Prevents changes from being being applied to all references
-	// https://stackoverflow.com/a/52988069
-	private def deepcopy(orig) {
-		return new JsonSlurper().parseText(JsonOutput.toJson(orig))
-	}
-	
+	}	
 	
 	enum LTC_STATUS { NONE, BROKEN, VALID, EXPIRED }
 	enum STATUS { WAIVERS, KEEPER, TRADED, DROPPED }

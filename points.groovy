@@ -10,9 +10,9 @@ def points() {
 		(0..125).each() { num ->
 			def tagsoupParser = new org.ccil.cowan.tagsoup.Parser()
 			def slurper = new XmlSlurper(tagsoupParser)
-			def url = https://fantasy.nfl.com/league/2393954/players?playerStatus=all&position= + pos_index
+			def url = "https://fantasy.nfl.com/league/2393954/players?playerStatus=all&position=" + pos_index
 			if (num != 0)
-				url = https://fantasy.nfl.com/league/2393954/players?playerStatus=all&position= + pos_index + "&offset=" + ((num * 25) + 1).toString()
+				url = "https://fantasy.nfl.com/league/2393954/players?playerStatus=all&position=" + pos_index + "&offset=" + ((num * 25) + 1).toString()
 			def htmlParser = slurper.parse(url)
 
 			try {

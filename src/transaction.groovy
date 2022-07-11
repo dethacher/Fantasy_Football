@@ -1,4 +1,5 @@
 // Author: David Thacher
+package src
 @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='1.2' )
 import java.util.concurrent.*
 

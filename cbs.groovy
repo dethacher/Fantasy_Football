@@ -23,14 +23,14 @@ def depth(team_url) {
 						String href = t.td[num].span[1].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
 						if (name != "") {
 							names.add(name)
-							ids.add(href.split("/")[4])
+							ids.add(href.split("/")[3])
 						}
 						else {
 							name = t.td[num].span[2].span[0].a[0].text().trim()
 							href = t.td[num].span[2].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
 							if (name != "") {
 								names.add(name)
-								ids.add(href.split("/")[4])
+								ids.add(href.split("/")[3])
 							}
 						}
 					}
@@ -43,14 +43,14 @@ def depth(team_url) {
 							String href = t.td[num].div[0].div[x].span[1].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
 							if (name != "") {
 								names.add(name)
-								ids.add(href.split("/")[4])
+								ids.add(href.split("/")[3])
 							}
 							else {
 								name = t.td[num].div[0].div[x].span[2].span[0].a[0].text().trim()
 								href = t.td[num].div[0].div[x].span[2].span[0].collect { d -> d.'**'.find { it.name() == 'a' }?.@href }.findAll()[0]
 								if (name != "") {
 									names.add(name)
-									ids.add(href.split("/")[4])
+									ids.add(href.split("/")[3])
 								}
 							}
 						}
@@ -139,6 +139,40 @@ def pos_lut = [
 	[ "Kick Returner", "KR" ]
 ]
 
+def pos_lut_modified = [
+	[ "Quarterback", "QB" ],
+	[ "Running Back", "RB" ],
+	[ "Fullback", "FB" ],
+	[ "Wide Receiver", "WR" ],
+	[ "Tight End", "TE" ],
+	[ "Left Tackle", "DELETE" ],
+	[ "Left Guard", "DELETE" ],
+	[ "Center", "DELETE" ],
+	[ "Right Guard", "DELETE" ],
+	[ "Right Tackle", "DELETE" ],
+	[ "Left Defensive End", "DL" ],
+	[ "Right Defensive End", "DL" ],
+	[ "Left Defensive Tackle", "DL" ],
+	[ "Nose Tackle", "DL" ],
+	[ "Right Defensive Tackle", "DL" ],
+	[ "Left Inside Linebacker", "LB" ],
+	[ "Right Inside Linebacker", "LB" ],
+	[ "Strongside Linebacker", "LB" ],
+	[ "Strongside Linebacker", "LB" ],
+	[ "Middle Linebacker", "LB" ],
+	[ "Weakside Linebacker", "LB" ],
+	[ "Right Cornerback", "DB" ],
+	[ "Left Cornerback", "DB" ],
+	[ "Strong Safety", "DB" ],
+	[ "Free Safety", "DB" ],
+	[ "Punter", "DELETE" ],
+	[ "Kicker", "K" ],
+	[ "Long Snapper", "DELETE" ],
+	[ "Holder", "DELETE" ],
+	[ "Punt Returner", "DELETE" ],
+	[ "Kick Returner", "DELETE" ]
+]
+
 println "\n\nScript Output"
 def file = new File(" Depth Chart " + new Date().toTimestamp().toString() + ".csv")
 file.text = ''
@@ -148,10 +182,21 @@ teams.each {
 
 	depth(it.URL).each() {
 		def num = 1
-		def pos = pos_lut.find { p -> p[0] == it.Position }[1]
-		it.Players.eachWithIndex { player, i ->
-			file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "," + it.IDs[i] + "\n"
-			++num
+		if (true) {
+			def pos = pos_lut_modified.find { p -> p[0] == it.Position }[1]
+			if (pos != "DELETE") {
+				it.Players.eachWithIndex { player, i ->
+					file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "," + it.IDs[i] + "\n"
+					++num
+				}
+			}
+		}
+		else {
+			def pos = pos_lut_modified.find { p -> p[0] == it.Position }[1]
+			it.Players.eachWithIndex { player, i ->
+				file << pos + "-" + Integer.toString(num) + "," + team + "," + player + "," + it.IDs[i] + "\n"
+				++num
+			}
 		}
 	}
 }
