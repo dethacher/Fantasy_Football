@@ -71,6 +71,17 @@ class league {
 							table[index].LTC_BEGIN = years[0]
 						}
 					}
+					else if (years[1] - yr == 0) {
+						index = (int) index[0]
+						if (years[0] > table[index].LTC_BEGIN) {
+							table[index].LTC_TEAM = team
+							table[index].LTC_COST = line[3].findAll( /\d+/ )*.toInteger()[0]
+							table[index].Cost = table[index].LTC_COST
+							table[index].LTC_Status = LTC_STATUS.EXPIRED
+							table[index].LTC_TERM = years[1] - yr
+							table[index].LTC_BEGIN = years[0]
+						}
+					}
 				}
 			}
 		}
@@ -144,6 +155,9 @@ class league {
 				])
 			}
 		}
+		
+		pts.populate()
+		pts.set_top_earners(table)
 
 		// Update with Keepers. (Check for breaks)
 		if (isFinal) {
@@ -365,16 +379,20 @@ class league {
 				player.Cost = getMin(player.Position, Math.round(player.Cost * 1.2), draft)
 				break;
 			case STATUS.KEEPER:
-				if (player.LTC_Status != LTC_STATUS.VALID)
-					player.Cost = getMin(player.Position, Math.round(player.Cost * 1.15), draft)
-				else
+				if (player.LTC_Status == LTC_STATUS.EXPIRED) {
+					player.Cost = getMin(player.Position, Math.round(pts.get_player_cost(player) * 1.15), draft)
+					println "Running new logic: Player " + player.Player + " Team " + getName(player.Team, names, true)
+				}
+				else if (player.LTC_Status == LTC_STATUS.VALID)
 					player.Cost = getMin(player.Position, player.Cost, draft)
+				else
+					player.Cost = getMin(player.Position, Math.round(player.Cost * 1.15), draft)
 				break;
 		}
 	}
 	
 	private def getMin(position, cost, table) {
-		def result = table.get(position)?.value
+		def result = table.get(position)
 		
 		if (result > cost)
 			return result
@@ -415,4 +433,5 @@ class league {
 	private def drafter = new draft()
 	private def keeper = new keepers()
 	private def transactions = new transaction()
+	private def pts = new points()
 }
