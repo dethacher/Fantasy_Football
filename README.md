@@ -31,13 +31,6 @@ This code is a quick and dirty attempt at automating a long term keeper fantasy 
 - Draft
 - Manual calculation of waivers.
 
-## Future
+## Future:
 Waivers and LTC?
-
-## Other Scripts
-cbs.groovy - This downloads current depth chart information from CBS sports.
-
-transactions.groovy - This downloads all the transactions for a given year of a given NFL.com fantasy league id. Currently defaults to current year for a specific league.
-
-points.groovy - This currently downloads the point data for current year of a specific NFL.com fantasy league.
 
