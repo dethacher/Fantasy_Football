@@ -1,10 +1,11 @@
 // Author: David Thacher
+package src
 @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='1.2' )
 
 class league {
 	def populate(isFinal = false) {
 		// Load name changes from name_changes.csv
-		new File("name_changes.csv").eachLine {
+		new File("data/name_changes.csv").eachLine {
 			def line = it.split(',')
 			
 			names.add( [
@@ -46,7 +47,7 @@ class league {
 		// Apply Old LTCs.
 		//  CSV uses the following format, one entry per line
 		//	Player_Name, LTC (xx-yy), Team, Cost
-		new File("ltc.csv").eachLine {
+		new File("data/ltc.csv").eachLine {
 			def yr = new Date().year - 100 - 1	// The draft has not occured so still last year
 			def line = it.split(',')
 			def team = getName(line[2], names, false)

@@ -1,4 +1,5 @@
 // Credit: https://www.docmosis.com/company/blog/7-february-2015.html
+package src
 
 import java.io.File;
 import java.util.Date;
@@ -32,7 +33,7 @@ def merge(team = "", roster = "", money = "", ltc = "", broken = "", nokeep = ""
 	String workingDir = new File(".").getAbsolutePath() + "/";
 	String reportDir = workingDir + "Reports/";
 	new File(reportDir).mkdirs();
-	String myTemplate = workingDir + "letterTemplate.doc";
+	String myTemplate = workingDir + "data/letterTemplate.doc";
 	
 	if (!new File(myTemplate).canRead()) {
 		throw new RuntimeException("Cannot load template:" + new File(myTemplate));
