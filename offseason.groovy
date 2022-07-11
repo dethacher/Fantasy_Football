@@ -1,8 +1,10 @@
 // Author: David Thacher
+import src.mailmerge
+import src.league
 
 println "\n\nScript Output"
-merger = new src.mailmerge()
-fantasy = new src.league()
+merger = new mailmerge()
+fantasy = new league()
 
 fantasy.populate(true)
 
